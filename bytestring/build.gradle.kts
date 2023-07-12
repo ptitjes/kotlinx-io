@@ -1,5 +1,6 @@
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 
 plugins {
     kotlin("multiplatform")
@@ -13,6 +14,13 @@ kotlin {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
+    }
+
+    @OptIn(org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl::class)
+    wasm {
+        nodejs()
+        //browser()
+        binaries.executable()
     }
 
     js(IR) {
@@ -79,4 +87,8 @@ tasks.withType<DokkaTaskPartial>().configureEach {
 
         samples.from("common/test/samples/samples.kt")
     }
+}
+
+rootProject.the<NodeJsRootExtension>().apply {
+    nodeVersion = "20.3.0"
 }
