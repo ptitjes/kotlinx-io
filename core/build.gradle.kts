@@ -61,16 +61,8 @@ kotlin {
         val jvmMain by getting
         val jvmTest by getting
 
-        val jsMain by getting
-        val jsTest by getting
-
-        val wasmMain by getting {
-            dependsOn(jsMain)
-        }
-
-        val wasmTest by getting {
-            dependsOn(jsTest)
-        }
+        val wasmMain by getting
+        val wasmTest by getting
 
         createSourceSet("nativeMain", parent = commonMain, children = nativeTargets)
         createSourceSet("nativeTest", parent = commonTest, children = nativeTargets)
