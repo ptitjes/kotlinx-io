@@ -20,18 +20,21 @@ public actual class Path internal constructor(
 
 public actual fun Path(path: String): Path = Path(path, null)
 
+@OptIn(ExperimentalForeignApi::class)
 public actual fun Path.source(): Source {
     val openFile: CPointer<FILE> = fopen(path, "rb")
         ?: throw IOException("Failed to open $path with ${strerror(errno)?.toKString()}")
     return FileSource(openFile).buffered()
 }
 
+@OptIn(ExperimentalForeignApi::class)
 public actual fun Path.sink(): Sink {
     val openFile: CPointer<FILE> = fopen(path, "wb")
         ?: throw IOException("Failed to open $path with ${strerror(errno)?.toKString()}")
     return FileSink(openFile).buffered()
 }
 
+@OptIn(ExperimentalForeignApi::class)
 internal class FileSource(
     private val file: CPointer<FILE>
 ) : RawSource {
@@ -65,20 +68,21 @@ internal class FileSource(
     }
 }
 
-@OptIn(UnsafeNumber::class)
+@OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 internal fun variantFread(
     target: CPointer<ByteVarOf<Byte>>,
     byteCount: UInt,
     file: CPointer<FILE>
 ): UInt = fread(target, 1u, byteCount.convert(), file).convert()
 
-@OptIn(UnsafeNumber::class)
+@OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 internal fun variantFwrite(
     source: CPointer<ByteVar>,
     byteCount: UInt,
     file: CPointer<FILE>
 ): UInt = fwrite(source, 1u, byteCount.convert(), file).convert()
 
+@OptIn(ExperimentalForeignApi::class)
 internal class FileSink(
     private val file: CPointer<FILE>
 ) : RawSink {

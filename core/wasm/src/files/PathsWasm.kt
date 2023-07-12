@@ -5,7 +5,8 @@
 
 package kotlinx.io.files
 
-import kotlinx.io.*
+import kotlinx.io.Sink
+import kotlinx.io.Source
 
 
 public actual class Path internal constructor(private val path: String,
@@ -13,14 +14,8 @@ public actual class Path internal constructor(private val path: String,
     override fun toString(): String = path
 }
 
-public actual fun Path(path: String): Path {
-    return Path(path, null)
-}
+public actual fun Path(path: String): Path = TODO("Files are not yet supported on Wasm")
 
-public actual fun Path.source(): Source {
-    TODO()
-}
+public actual fun Path.source(): Source = TODO("Files are not yet supported on Wasm")
 
-public actual fun Path.sink(): Sink {
-    TODO()
-}
+public actual fun Path.sink(): Sink = TODO("Files are not yet supported on Wasm")

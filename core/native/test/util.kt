@@ -4,18 +4,21 @@
  */
 package kotlinx.io
 
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.cstr
+import kotlinx.cinterop.toKString
 import platform.posix.*
 import kotlin.random.Random
-import kotlin.system.getTimeMillis
 
+@OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 actual fun createTempFile(): String {
     val template = "tmp-XXXXXX"
     val path = mktemp(template.cstr) ?: throw IOException("Filed to create temp file: ${strerror(errno)}")
     // mktemp don't work on MacOS 13+ (as well as mkstemp), at least the way it's expected.
     if (path.toKString() == "") {
         val tmpDir = getenv("TMPDIR")?.toKString() ?: getenv("TMP")?.toKString() ?: ""
-        val rnd = Random(getTimeMillis())
+        val rnd = Random(time(null))
         var manuallyConstructedPath: String
         do {
             manuallyConstructedPath = "$tmpDir/tmp-${rnd.nextInt()}"
@@ -25,6 +28,7 @@ actual fun createTempFile(): String {
     return path.toKString()
 }
 
+@OptIn(ExperimentalForeignApi::class)
 actual fun deleteFile(path: String) {
     if (access(path, F_OK) != 0) throw IOException("File does not exist: $path")
     if (remove(path) != 0) {

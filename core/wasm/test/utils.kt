@@ -5,13 +5,5 @@
 
 package kotlinx.io
 
-import kotlin.random.Random
-import kotlin.random.nextULong
-
-actual fun createTempFile(): String {
-    TODO()
-}
-
-actual fun deleteFile(path: String) {
-    TODO()
-}
+actual fun createTempFile(): String = TODO("Files support is missing for Wasm")
+actual fun deleteFile(path: String): Unit = TODO("Files support is missing for Wasm")
