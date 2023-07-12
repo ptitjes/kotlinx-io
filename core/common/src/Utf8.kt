@@ -217,11 +217,10 @@ internal fun Source.readUtf8CodePoint(): Int {
     require(1)
 
     val b0 = buffer[0].toInt()
-    when {
-        b0 and 0xe0 == 0xc0 -> require(2)
-        b0 and 0xf0 == 0xe0 -> require(3)
-        b0 and 0xf8 == 0xf0 -> require(4)
-    }
+    // Workaround for https://youtrack.jetbrains.com/issue/KT-60212
+    if (b0 and 0xe0 == 0xc0) require(2)
+    if (b0 and 0xf0 == 0xe0) require(3)
+    if (b0 and 0xf8 == 0xf0) require(4)
 
     return buffer.commonReadUtf8CodePoint()
 }
@@ -331,39 +330,36 @@ private fun Buffer.commonReadUtf8CodePoint(): Int {
     val byteCount: Int
     val min: Int
 
-    when {
-        b0 and 0x80 == 0 -> {
-            // 0xxxxxxx.
-            codePoint = b0 and 0x7f
-            byteCount = 1 // 7 bits (ASCII).
-            min = 0x0
-        }
-
-        b0 and 0xe0 == 0xc0 -> {
+    // Workaround for https://youtrack.jetbrains.com/issue/KT-60212
+    if (b0 and 0x80 == 0) {
+        // 0xxxxxxx.
+        codePoint = b0 and 0x7f
+        byteCount = 1 // 7 bits (ASCII).
+        min = 0x0
+    } else {
+        if (b0 and 0xe0 == 0xc0) {
             // 0x110xxxxx
-            codePoint = b0 and 0x1f
+            codePoint = b0 and 0x1f // codePoint == 31
             byteCount = 2 // 11 bits (5 + 6).
             min = 0x80
-        }
-
-        b0 and 0xf0 == 0xe0 -> {
-            // 0x1110xxxx
-            codePoint = b0 and 0x0f
-            byteCount = 3 // 16 bits (4 + 6 + 6).
-            min = 0x800
-        }
-
-        b0 and 0xf8 == 0xf0 -> {
-            // 0x11110xxx
-            codePoint = b0 and 0x07
-            byteCount = 4 // 21 bits (3 + 6 + 6 + 6).
-            min = 0x10000
-        }
-
-        else -> {
-            // We expected the first byte of a code point but got something else.
-            skip(1)
-            return REPLACEMENT_CODE_POINT
+        } else {
+            if (b0 and 0xf0 == 0xe0) {
+                // 0x1110xxxx
+                codePoint = b0 and 0x0f
+                byteCount = 3 // 16 bits (4 + 6 + 6).
+                min = 0x800
+            } else {
+                if (b0 and 0xf8 == 0xf0) {
+                    // 0x11110xxx
+                    codePoint = b0 and 0x07
+                    byteCount = 4 // 21 bits (3 + 6 + 6 + 6).
+                    min = 0x10000
+                } else {
+                    // We expected the first byte of a code point but got something else.
+                    skip(1)
+                    return REPLACEMENT_CODE_POINT
+                }
+            }
         }
     }
 
