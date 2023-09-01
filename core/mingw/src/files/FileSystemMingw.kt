@@ -7,16 +7,19 @@
 
 package kotlinx.io.files
 
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.cstr
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toKString
 import kotlinx.io.IOException
 import platform.posix.*
 import platform.windows.GetLastError
-import platform.windows.MOVEFILE_REPLACE_EXISTING
-import platform.windows.MoveFileExA
 import platform.windows.PathIsRelativeA
+import platform.windows.ReplaceFileA
 
 internal actual fun atomicMoveImpl(source: Path, destination: Path) {
-    if (MoveFileExA(source.path, destination.path, MOVEFILE_REPLACE_EXISTING.convert()) == 0) {
+    if (ReplaceFileA(destination.path, source.path, null,
+            0u, null, null) == 0) {
         // TODO: get formatted error message
         throw IOException("Move failed with error code: ${GetLastError()}")
     }
