@@ -1,5 +1,9 @@
 package kotlinx.io
 
+import kotlinx.io.internal.asInt
+import kotlinx.io.internal.asLong
+import kotlinx.io.internal.asShort
+
 public fun Source.readView(byteCount: Long): BufferView {
     val buffer = Buffer()
     buffer.write(this, byteCount)
@@ -44,12 +48,10 @@ public class BufferView internal constructor(buffer: Buffer) : AutoCloseableAlia
 
         val segmentPosition = (position - element.offset).toInt()
         if (segment.size - segmentPosition < 2) {
-            val s = getByte(position) and 0xff shl 8 or (getByte(position + 1) and 0xff)
-            return s.toShort()
+            return asShort(getByte(position), getByte(position + 1))
         }
 
-        val s = segment[segmentPosition] and 0xff shl 8 or (segment[segmentPosition + 1] and 0xff)
-        return s.toShort()
+        return asShort(segment[segmentPosition], segment[segmentPosition + 1])
     }
 
     public fun getInt(position: Long): Int {
@@ -61,20 +63,20 @@ public class BufferView internal constructor(buffer: Buffer) : AutoCloseableAlia
 
         val segmentPosition = (position - element.offset).toInt()
         if (segment.size - segmentPosition < 4) {
-            return (
-                    getByte(position) and 0xff shl 24
-                            or (getByte(position + 1) and 0xff shl 16)
-                            or (getByte(position + 2) and 0xff shl 8)
-                            or (getByte(position + 3) and 0xff)
-                    )
+            return asInt(
+                getByte(position),
+                getByte(position + 1),
+                getByte(position + 2),
+                getByte(position + 3)
+            )
         }
 
-        return (
-                segment[segmentPosition] and 0xff shl 24
-                        or (segment[segmentPosition + 1] and 0xff shl 16)
-                        or (segment[segmentPosition + 2] and 0xff shl 8)
-                        or (segment[segmentPosition + 3] and 0xff)
-                )
+        return asInt(
+            segment[segmentPosition],
+            segment[segmentPosition + 1],
+            segment[segmentPosition + 2],
+            segment[segmentPosition + 3]
+        )
     }
 
     public fun getLong(position: Long): Long {
@@ -86,22 +88,19 @@ public class BufferView internal constructor(buffer: Buffer) : AutoCloseableAlia
 
         val segmentPosition = (position - element.offset).toInt()
         if (segment.size - segmentPosition < 8) {
-            return (
-                    getInt(position) and 0xffffffffL shl 32
-                            or (getInt(position + 4) and 0xffffffffL)
-                    )
+            return asLong(getInt(position), getInt(position + 4))
         }
 
-        return (
-                segment[segmentPosition] and 0xffL shl 56
-                        or (segment[segmentPosition + 1] and 0xffL shl 48)
-                        or (segment[segmentPosition + 2] and 0xffL shl 40)
-                        or (segment[segmentPosition + 3] and 0xffL shl 32)
-                        or (segment[segmentPosition + 4] and 0xffL shl 24)
-                        or (segment[segmentPosition + 5] and 0xffL shl 16)
-                        or (segment[segmentPosition + 6] and 0xffL shl 8)
-                        or (segment[segmentPosition + 7] and 0xffL)
-                )
+        return asLong(
+            segment[segmentPosition],
+            segment[segmentPosition + 1],
+            segment[segmentPosition + 2],
+            segment[segmentPosition + 3],
+            segment[segmentPosition + 4],
+            segment[segmentPosition + 5],
+            segment[segmentPosition + 6],
+            segment[segmentPosition + 7]
+        )
     }
 
     public fun slice(

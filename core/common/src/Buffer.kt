@@ -20,6 +20,9 @@
  */
 package kotlinx.io
 
+import kotlinx.io.internal.asInt
+import kotlinx.io.internal.asLong
+import kotlinx.io.internal.asShort
 import kotlin.jvm.JvmField
 
 /**
@@ -93,12 +96,11 @@ public class Buffer : Source, Sink {
 
         // If the short is split across multiple segments, delegate to readByte().
         if (limit - pos < 2) {
-            val s = readByte() and 0xff shl 8 or (readByte() and 0xff)
-            return s.toShort()
+            return asShort(readByte(), readByte())
         }
 
         val data = segment.data
-        val s = data[pos++] and 0xff shl 8 or (data[pos++] and 0xff)
+        val s = asShort(data[pos++], data[pos++])
         size -= 2L
 
         if (pos == limit) {
@@ -108,7 +110,7 @@ public class Buffer : Source, Sink {
             segment.pos = pos
         }
 
-        return s.toShort()
+        return s
     }
 
     override fun readInt(): Int {
@@ -120,21 +122,11 @@ public class Buffer : Source, Sink {
 
         // If the int is split across multiple segments, delegate to readByte().
         if (limit - pos < 4L) {
-            return (
-                    readByte() and 0xff shl 24
-                            or (readByte() and 0xff shl 16)
-                            or (readByte() and 0xff shl 8)
-                            or (readByte() and 0xff)
-                    )
+            return asInt(readByte(), readByte(), readByte(), readByte())
         }
 
         val data = segment.data
-        val i = (
-                data[pos++] and 0xff shl 24
-                        or (data[pos++] and 0xff shl 16)
-                        or (data[pos++] and 0xff shl 8)
-                        or (data[pos++] and 0xff)
-                )
+        val i = asInt(data[pos++], data[pos++], data[pos++], data[pos++])
         size -= 4L
 
         if (pos == limit) {
@@ -156,23 +148,20 @@ public class Buffer : Source, Sink {
 
         // If the long is split across multiple segments, delegate to readInt().
         if (limit - pos < 8L) {
-            return (
-                    readInt() and 0xffffffffL shl 32
-                            or (readInt() and 0xffffffffL)
-                    )
+            return asLong(readInt(), readInt())
         }
 
         val data = segment.data
-        val v = (
-                data[pos++] and 0xffL shl 56
-                        or (data[pos++] and 0xffL shl 48)
-                        or (data[pos++] and 0xffL shl 40)
-                        or (data[pos++] and 0xffL shl 32)
-                        or (data[pos++] and 0xffL shl 24)
-                        or (data[pos++] and 0xffL shl 16)
-                        or (data[pos++] and 0xffL shl 8)
-                        or (data[pos++] and 0xffL)
-                )
+        val v = asLong(
+            data[pos++],
+            data[pos++],
+            data[pos++],
+            data[pos++],
+            data[pos++],
+            data[pos++],
+            data[pos++],
+            data[pos++]
+        )
         size -= 8L
 
         if (pos == limit) {
