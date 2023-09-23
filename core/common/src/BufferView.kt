@@ -10,6 +10,15 @@ public fun Source.readView(byteCount: Long): BufferView {
     return BufferView(buffer)
 }
 
+public fun Buffer.copyToView(
+    startIndex: Long = 0L,
+    endIndex: Long = size,
+): BufferView {
+    val copy = Buffer()
+    this.copyTo(copy, startIndex, endIndex)
+    return BufferView(copy)
+}
+
 /**
  * Not multithread-safe.
  */
@@ -110,9 +119,7 @@ public class BufferView internal constructor(buffer: Buffer) : AutoCloseableAlia
         if (buffer == null) throw EOFException("BufferView has been closed")
         checkBounds(size, startIndex, endIndex)
 
-        val copy = Buffer()
-        buffer!!.copyTo(copy, startIndex, endIndex)
-        return BufferView(copy)
+        return buffer!!.copyToView(startIndex, endIndex)
     }
 }
 
