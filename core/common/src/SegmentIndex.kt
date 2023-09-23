@@ -11,6 +11,7 @@ internal class SegmentIndex private constructor(
 
     companion object {
         fun build(buffer: Buffer): SegmentIndex {
+            // TODO Use segments iterator instead (cf. https://github.com/Kotlin/kotlinx-io/issues/135)
             val head = buffer.head ?: return SegmentIndex(listOf())
 
             val indexes = buildList {
